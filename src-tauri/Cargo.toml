@@ -21,6 +21,14 @@ tauri-plugin-global-shortcut = "=2.3.2"
 tauri-graphql-transport = { path = "../crates/tauri-graphql-transport" }
 taurpc.workspace = true
 
+# macOS only, and only for the overlay's window behaviour: Tauri's
+# set_visible_on_all_workspaces sets NSWindowCollectionBehaviorCanJoinAllSpaces
+# and nothing else, which is not enough to keep a floating overlay on screen
+# across Spaces. See src/overlay.rs.
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "=0.6.4"
+objc2-app-kit = { version = "=0.3.2", features = ["NSWindow", "NSResponder"] }
+
 [dev-dependencies]
 tauri = { workspace = true, features = ["test"] }
 tempfile.workspace = true
