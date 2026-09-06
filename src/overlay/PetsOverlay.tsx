@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { useLockInPets } from "../lockin/useLockInPets.ts";
-import { watchClickable } from "./clickable.ts";
+import { CLICKABLE_CLASS, watchClickable } from "./clickable.ts";
 import { loadPetManifest, type PetPlacement } from "./petManifest.ts";
 
 // Every pet is its own document in a sandboxed frame: a pet's CSS and JS
@@ -13,6 +13,16 @@ export function PetsOverlay() {
   const lockIn = useLockInPets();
 
   useEffect(watchClickable, []);
+  // While a lock-in pet is up the whole document is `.clickable` -- the same
+  // move the blob makes for the length of a drag -- so the host stops passing
+  // the cursor through and the distraction underneath cannot be clicked or
+  // scrolled. The keyboard still reaches it: this window is not focusable.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (lockIn.pets.length > 0) root.classList.add(CLICKABLE_CLASS);
+    else root.classList.remove(CLICKABLE_CLASS);
+    return () => root.classList.remove(CLICKABLE_CLASS);
+  }, [lockIn.pets.length]);
   useEffect(() => {
     loadPetManifest().then(setPets, (reason: unknown) => setError(String(reason)));
   }, []);

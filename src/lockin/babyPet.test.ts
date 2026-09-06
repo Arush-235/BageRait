@@ -5,19 +5,14 @@ import { BABY_PET_DOCUMENT, babyPetSrc, babyTaunt } from "./babyPet.ts";
 
 const params = (index: number) => new URLSearchParams(babyPetSrc(index).split("?")[1]);
 
-test("a spawn points at the overlay document and loops while the user is away", () => {
+test("a spawn points at the overlay document and plays once", () => {
   assert.ok(babyPetSrc(0).startsWith(`${BABY_PET_DOCUMENT}?`));
-  assert.equal(params(0).get("loop"), "1");
+  assert.equal(params(0).get("loop"), null);
 });
 
-test("each baby gets its own splat and a faster clock than the one before", () => {
+test("each distraction gets its own splat", () => {
   assert.notEqual(params(1).get("seed"), params(0).get("seed"));
-  assert.equal(params(0).get("speed"), "1.00");
-  assert.ok(Number(params(3).get("speed")) > Number(params(0).get("speed")));
-});
-
-test("the overlay's own clamp is never asked for an out-of-range speed", () => {
-  assert.ok(Number(params(3).get("speed")) <= 5);
+  assert.equal(params(0).get("seed"), params(0).get("seed"));
 });
 
 test("the taunt names the distracting site, without the www", () => {

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
+import { emit } from "@tauri-apps/api/event";
 import { register, unregister } from "@tauri-apps/plugin-global-shortcut";
 
-import { MAX_BABIES, babyPetSrc, babyTaunt } from "./babyPet.ts";
+import { babyPetSrc, babyTaunt } from "./babyPet.ts";
+import { devLog, devLogError } from "./devLog.ts";
 import { lockIn, type Unlock } from "./lockIn.ts";
 
 export const HOTKEY = "CmdOrCtrl+Shift+L";
-// 5s on another app before the first baby, one more every 5s after that.
+// 5s on another app before the baby arrives.
 const DWELL_MS = 5000;
-const ESCALATE_MS = 5000;
 
 // There is one global hotkey and React StrictMode mounts this effect twice in
 // development, so an unguarded pair of async register/unregister calls
@@ -34,47 +35,59 @@ export function useLockInPets(): {
 
   useEffect(() => {
     let unlock: Unlock | null = null;
-    let escalate: ReturnType<typeof setInterval> | null = null;
+    let anchorApp: string | null = null;
+    let distractions = 0;
     const clear = () => {
-      if (escalate) clearInterval(escalate);
-      escalate = null;
       setPets([]);
       setTaunt(null);
     };
+    // The pet announces its outro to the parent frame. That is the cue to walk
+    // the user back: Rust brings the anchor forward, the poll sees it in front,
+    // and the distraction ends the ordinary way.
+    const onMessage = (event: MessageEvent) => {
+      const message = event.data as { source?: string; event?: string } | null;
+      if (message?.source !== "babyOverlay" || message.event !== "finish" || !anchorApp) return;
+      devLog(`pet finished, refocusing ${anchorApp}`);
+      void emit("lockin:refocus", { app: anchorApp }).catch(devLogError("refocus failed"));
+    };
+    window.addEventListener("message", onMessage);
     const toggle = async () => {
       if (unlock) {
         await unlock();
         unlock = null;
+        anchorApp = null;
         setAnchor(null);
         clear();
         return;
       }
       unlock = await lockIn({ dwellMs: DWELL_MS }, (t) => {
-        if (t.state === "locked") return setAnchor(t.app);
+        devLog(`${t.state}: ${t.app}${t.url ? ` (${t.url})` : ""}`);
+        if (t.state === "locked") {
+          anchorApp = t.app;
+          return setAnchor(t.app);
+        }
         clear();
         if (t.state === "focused") return;
-        // Distracted: one baby now, another every ESCALATE_MS up to the cap.
+        distractions += 1;
         setTaunt(babyTaunt(t.url));
-        let spawned = 0;
-        const spawn = () => {
-          spawned += 1;
-          setPets((current) => [...current, babyPetSrc(current.length)]);
-          if (spawned >= MAX_BABIES && escalate) {
-            clearInterval(escalate);
-            escalate = null;
-          }
-        };
-        spawn();
-        escalate = setInterval(spawn, ESCALATE_MS);
+        setPets([babyPetSrc(distractions - 1)]);
       });
     };
     void queueHotkey(() =>
       register(HOTKEY, (e) => {
-        if (e.state === "Pressed") void toggle().catch(console.error);
-      }).catch(console.error),
+        if (e.state !== "Pressed") return;
+        devLog(`${HOTKEY} pressed`);
+        void toggle().catch(devLogError("lock-in toggle failed"));
+      }).then(
+        () => devLog(`${HOTKEY} registered`),
+        devLogError(`${HOTKEY} could not be registered`),
+      ),
     );
     return () => {
-      void queueHotkey(() => unregister(HOTKEY).catch(console.error));
+      window.removeEventListener("message", onMessage);
+      void queueHotkey(() =>
+        unregister(HOTKEY).catch(devLogError(`${HOTKEY} could not be unregistered`)),
+      );
       void unlock?.();
       clear();
     };

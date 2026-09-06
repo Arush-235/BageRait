@@ -1,7 +1,8 @@
 //! Lock-in mode: the frontmost app when it starts is the anchor. Any other
 //! app held for `dwell_ms` is a distraction; returning to the anchor ends it.
 //! Driven over Tauri events so the TauRPC handler stays untouched:
-//!   JS emits `lockin:start` `{ "dwellMs": n }` and `lockin:stop`;
+//!   JS emits `lockin:start` `{ "dwellMs": n }`, `lockin:stop`, and
+//!   `lockin:refocus` `{ "app": name }` when the pet's outro has played;
 //!   Rust emits `lockin` `{ state: "locked" | "focused" | "distracted", app, url? }`:
 //!   `locked` once with the anchor, then one per transition.
 
@@ -31,6 +32,12 @@ struct Start {
     dwell_ms: u64,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct Refocus {
+    app: String,
+}
+
 #[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 struct Transition {
@@ -40,11 +47,27 @@ struct Transition {
 }
 
 pub fn install<R: Runtime>(app: &AppHandle<R>) {
+    // The overlay webview has no console anyone can see, so it sends anything
+    // worth reading here. Debug builds only, matching the JS half.
+    #[cfg(debug_assertions)]
+    app.listen("lockin:log", |event| {
+        println!("lock-in: {}", event.payload().trim_matches('"'));
+    });
     // Each start bumps the generation; the running thread exits when it sees a newer one.
     let generation = Arc::new(AtomicU64::new(0));
     let stop = generation.clone();
     app.listen("lockin:stop", move |_| {
         stop.fetch_add(1, Ordering::SeqCst);
+    });
+    // The pet's outro is the cue to walk the user back. `open -a` brings the
+    // anchor forward without sending it an Apple event, so there is no
+    // Automation prompt; the poll then sees the anchor in front and ends the
+    // distraction the ordinary way.
+    app.listen("lockin:refocus", |event| {
+        let Ok(refocus) = serde_json::from_str::<Refocus>(event.payload()) else {
+            return;
+        };
+        let _ = Command::new("open").arg("-a").arg(refocus.app).spawn();
     });
     let handle = app.clone();
     app.listen("lockin:start", move |event| {
