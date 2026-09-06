@@ -1,0 +1,10 @@
+/node_modules/
+/dist/
+/dist-web/
+/schema.generated.graphql
+/target/
+# The Server Process writes its default Store into the working directory.
+/server-store.db
+/src-tauri/gen/
+*.log
+.DS_Store

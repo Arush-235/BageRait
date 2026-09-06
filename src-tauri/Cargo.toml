@@ -1,0 +1,23 @@
+[package]
+name = "tauri-graphql-app"
+version = "0.1.0"
+description = "Copy-ready Tauri GraphQL application"
+edition = "2021"
+publish = false
+default-run = "tauri-graphql-app"
+
+[lib]
+name = "tauri_graphql_app"
+
+[build-dependencies]
+tauri-build = { version = "=2.6.3", features = [] }
+
+[dependencies]
+app-schema = { path = "../crates/app-schema" }
+tauri = { workspace = true, features = ["macos-private-api"] }
+tauri-graphql-transport = { path = "../crates/tauri-graphql-transport" }
+taurpc.workspace = true
+
+[dev-dependencies]
+tauri = { workspace = true, features = ["test"] }
+tempfile.workspace = true
