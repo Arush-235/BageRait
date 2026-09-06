@@ -14,13 +14,21 @@ import {
   HTTP_ENDPOINT,
   WEBSOCKET_ENDPOINT,
 } from "./src/graphql/transport/webEndpoints.ts";
+import {
+  SELECTED_OVERLAY_MODULE_ID,
+  overlayModuleForTarget,
+} from "./src/overlay/overlaySelection.ts";
 
-// One UI, one Target per bundle: the alias below is the only place the two
-// Transports differ, and resolving it here rather than at runtime is what
-// keeps each Target's Transport out of the other Target's bundle.
+// One UI, one Target per bundle: the aliases below are the only places the two
+// Targets differ, and resolving them here rather than at runtime is what keeps
+// each Target's Transport — and the Desktop Target's overlay, which reaches for
+// Tauri IPC — out of the other Target's bundle.
 const target = parseTarget(process.env[TARGET_ENV_VAR]);
 const transportModule = fileURLToPath(
   new URL(transportModuleForTarget(target), import.meta.url),
+);
+const overlayModule = fileURLToPath(
+  new URL(overlayModuleForTarget(target), import.meta.url),
 );
 
 export default defineConfig({
@@ -29,6 +37,7 @@ export default defineConfig({
   resolve: {
     alias: {
       [SELECTED_TRANSPORT_MODULE_ID]: transportModule,
+      [SELECTED_OVERLAY_MODULE_ID]: overlayModule,
     },
   },
   server: {

@@ -12,6 +12,7 @@ run_with_bun() {
     modules/workspaces/ui/src/cache.test.ts \
     src/graphql/transport/targetSelection.test.ts \
     src/overlay/clickable.test.ts \
+    src/overlay/overlaySelection.test.ts \
     scripts/configure-template.test.mjs \
     scripts/module-ownership.test.mjs \
     scripts/module-seal.test.mjs \
@@ -28,6 +29,7 @@ run_with_node() {
     modules/workspaces/ui/src/cache.test.ts \
     src/graphql/transport/targetSelection.test.ts \
     src/overlay/clickable.test.ts \
+    src/overlay/overlaySelection.test.ts \
     scripts/configure-template.test.mjs \
     scripts/module-ownership.test.mjs \
     scripts/module-seal.test.mjs \
