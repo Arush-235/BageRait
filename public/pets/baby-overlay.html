@@ -39,6 +39,12 @@
   html,body{height:100%;margin:0;background:transparent;overflow:hidden;}
   body{-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;}
   #stage{position:fixed;inset:0;width:100%;height:100%;display:block;pointer-events:none;}
+  /* The splat lives in its own SVG, promoted to its own compositing layer:
+     WebKit runs SVG filters on the CPU and re-runs every blob's goo blur
+     whenever the layer it sits in repaints -- which, with the baby moving
+     underneath, was every frame. Isolated, the splat only repaints when the
+     splat itself changes. Stacked after #stage so it stays on top. */
+  #splatStage{position:fixed;inset:0;width:100%;height:100%;display:block;pointer-events:none;will-change:transform;}
   #catcher{position:fixed;inset:0;display:none;}
   body.blocking #catcher{display:block;}
   #hud{position:fixed;left:14px;top:14px;z-index:9;display:none;pointer-events:none;
@@ -182,9 +188,11 @@
     </g>
 
     <g id="tongueLayer"></g>
-    <g id="snotLayer"></g>
-    <g id="fx"></g>
   </g>
+</svg>
+<svg id="splatStage" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <g id="snotLayer"></g>
+  <g id="fx"></g>
 </svg>
 <div id="hud"></div>
 
@@ -478,8 +486,14 @@
       var b = snot[i];
       if (!b.alive || !b.drip) continue;
       b.dripLen = Math.min(b.dripMax, b.dripLen + dt / 1000 * b.dripSpeed);
-      b.dripEl.setAttribute('height', b.dripLen.toFixed(1));
-      b.beadEl.setAttribute('cy', (b.r * 0.22 + b.dripLen).toFixed(1));
+      // Drips grow well under a unit per frame, and every write to an element
+      // inside the goo filter makes WebKit re-run the blur for that blob on
+      // the CPU. Only touch the DOM every few units; the blur hides the steps.
+      var drawn = Math.round(b.dripLen / 6) * 6;
+      if (drawn === b.dripDrawn) continue;
+      b.dripDrawn = drawn;
+      b.dripEl.setAttribute('height', drawn.toFixed(1));
+      b.beadEl.setAttribute('cy', (b.r * 0.22 + drawn).toFixed(1));
     }
   });
 
