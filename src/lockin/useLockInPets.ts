@@ -5,12 +5,9 @@ import { MAX_BABIES, babyPetSrc, babyTaunt } from "./babyPet.ts";
 import { lockIn, type Unlock } from "./lockIn.ts";
 
 export const HOTKEY = "CmdOrCtrl+Shift+L";
-// Long enough that answering a message or checking a calendar is not a
-// distraction, short enough that a scroll session is caught while it is still
-// a decision. Escalation is slower than the first dwell: the point is mounting
-// pressure, not a wall of babies.
-const DWELL_MS = 20000;
-const ESCALATE_MS = 15000;
+// 5s on another app before the first baby, one more every 5s after that.
+const DWELL_MS = 5000;
+const ESCALATE_MS = 5000;
 
 // There is one global hotkey and React StrictMode mounts this effect twice in
 // development, so an unguarded pair of async register/unregister calls
