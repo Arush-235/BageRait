@@ -28,3 +28,28 @@ body:has(.overlay) {
   color: #fff;
   font: 600 13px system-ui;
 }
+
+/* The distraction named, under the babies. */
+.lockin-taunt {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6vh;
+  margin: 0;
+  text-align: center;
+  color: #fff;
+  font: 800 clamp(20px, 3vw, 44px) / 1.2 system-ui;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
+  animation: lockin-taunt-shake 0.32s infinite;
+}
+
+@keyframes lockin-taunt-shake {
+  0%,
+  100% {
+    transform: rotate(-1.2deg);
+  }
+  50% {
+    transform: rotate(1.2deg);
+  }
+}

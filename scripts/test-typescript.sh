@@ -11,6 +11,7 @@ run_with_bun() {
     modules/projects/ui/src/cache.test.ts \
     modules/workspaces/ui/src/cache.test.ts \
     src/graphql/transport/targetSelection.test.ts \
+    src/lockin/babyPet.test.ts \
     src/overlay/clickable.test.ts \
     src/overlay/overlaySelection.test.ts \
     scripts/configure-template.test.mjs \
@@ -28,6 +29,7 @@ run_with_node() {
     modules/projects/ui/src/cache.test.ts \
     modules/workspaces/ui/src/cache.test.ts \
     src/graphql/transport/targetSelection.test.ts \
+    src/lockin/babyPet.test.ts \
     src/overlay/clickable.test.ts \
     src/overlay/overlaySelection.test.ts \
     scripts/configure-template.test.mjs \

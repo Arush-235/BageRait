@@ -36,16 +36,17 @@ export function PetsOverlay() {
         />
       ))}
       {lockIn.anchor && <div className="lockin-badge">🔒 Locked in: {lockIn.anchor}</div>}
-      {lockIn.pets.map((html, index) => (
+      {lockIn.pets.map((src, index) => (
         <iframe
-          key={`lockin-${index}`}
+          key={src}
           className="pet"
           sandbox="allow-scripts allow-same-origin"
-          srcDoc={html}
-          title="lock-in pet"
+          src={src}
+          title={`lock-in pet ${index + 1}`}
           style={{ inset: 0, width: "100%", height: "100%" }}
         />
       ))}
+      {lockIn.taunt && <p className="lockin-taunt">{lockIn.taunt}</p>}
     </>
   );
 }

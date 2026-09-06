@@ -14,8 +14,16 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Listener, Runtime};
 
 const POLL: Duration = Duration::from_millis(500);
-/// OS chrome that neither starts nor resets the dwell clock.
-const NEUTRAL: &[&str] = &["Cute", "Finder", "Spotlight", "System Settings"];
+/// OS chrome that neither starts nor resets the dwell clock. This app is
+/// itself neutral under both names: the bundle is `Cute`, `tauri dev` runs the
+/// bare binary.
+const NEUTRAL: &[&str] = &[
+    "Cute",
+    "tauri-graphql-app",
+    "Finder",
+    "Spotlight",
+    "System Settings",
+];
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
