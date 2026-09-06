@@ -15,6 +15,9 @@ tauri-build = { version = "=2.6.3", features = [] }
 [dependencies]
 app-schema = { path = "../crates/app-schema" }
 tauri = { workspace = true, features = ["macos-private-api"] }
+serde.workspace = true
+serde_json.workspace = true
+tauri-plugin-global-shortcut = "=2.3.2"
 tauri-graphql-transport = { path = "../crates/tauri-graphql-transport" }
 taurpc.workspace = true
 

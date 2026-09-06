@@ -41,6 +41,7 @@
   "dependencies": {
     "@apollo/client": "4.2.10",
     "@tauri-apps/api": "2.11.1",
+    "@tauri-apps/plugin-global-shortcut": "2.3.2",
     "@tauri-graphql-template/apollo": "0.1.0",
     "graphql": "16.14.2",
     "graphql-ws": "6.2.1",

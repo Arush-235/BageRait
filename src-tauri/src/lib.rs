@@ -3,4 +3,5 @@
 //! which links no Tauri code.
 
 pub mod composition;
+pub mod lockin;
 pub mod overlay;

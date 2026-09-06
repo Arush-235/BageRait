@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "The overlay webview may use Tauri core IPC for the typed GraphQL transport and toggle cursor pass-through over `.clickable` elements.",
+  "description": "The overlay webview may use Tauri core IPC for the typed GraphQL transport and toggle cursor pass-through over `.clickable` elements. Lock-in mode registers a global hotkey and talks to Rust over events.",
   "windows": [
     "main"
   ],
@@ -10,6 +10,9 @@
     "core:window:allow-cursor-position",
     "core:window:allow-outer-position",
     "core:window:allow-scale-factor",
-    "core:window:allow-set-ignore-cursor-events"
+    "core:window:allow-set-ignore-cursor-events",
+    "core:event:default",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister"
   ]
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { useLockInPets } from "../lockin/useLockInPets.ts";
 import { watchClickable } from "./clickable.ts";
 import { loadPetManifest, type PetPlacement } from "./petManifest.ts";
 
@@ -9,6 +10,7 @@ import { loadPetManifest, type PetPlacement } from "./petManifest.ts";
 export function PetsOverlay() {
   const [pets, setPets] = useState<PetPlacement[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const lockIn = useLockInPets();
 
   useEffect(watchClickable, []);
   useEffect(() => {
@@ -31,6 +33,17 @@ export function PetsOverlay() {
             width: pet.width ?? "100%",
             height: pet.height ?? "100%",
           }}
+        />
+      ))}
+      {lockIn.anchor && <div className="lockin-badge">🔒 Locked in: {lockIn.anchor}</div>}
+      {lockIn.pets.map((html, index) => (
+        <iframe
+          key={`lockin-${index}`}
+          className="pet"
+          sandbox="allow-scripts allow-same-origin"
+          srcDoc={html}
+          title="lock-in pet"
+          style={{ inset: 0, width: "100%", height: "100%" }}
         />
       ))}
     </>
